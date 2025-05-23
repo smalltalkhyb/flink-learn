@@ -6,7 +6,7 @@
 
     <groupId>com.hyb.flink</groupId>
     <artifactId>flink-learn</artifactId>
-    <version>1.19.2</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
     <modules>
         <module>flink-learn-streaming</module>
