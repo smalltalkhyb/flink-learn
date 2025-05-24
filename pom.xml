@@ -10,6 +10,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>flink-learn-streaming</module>
+        <module>flink-lean-table</module>
     </modules>
 
 

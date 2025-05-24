@@ -18,17 +18,22 @@
 package com.hyb.flink.learn.streaming;
 
 import com.hyb.flink.learn.streaming.util.CLI;
+import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.RuntimeExecutionMode;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.serialization.SimpleStringEncoder;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.configuration.ConfigOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.MemorySize;
 import org.apache.flink.configuration.RestartStrategyOptions;
 import org.apache.flink.connector.file.sink.FileSink;
 import org.apache.flink.connector.file.src.FileSource;
 import org.apache.flink.connector.file.src.reader.TextLineInputFormat;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonParser;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.DefaultRollingPolicy;
@@ -37,6 +42,9 @@ import org.apache.flink.util.Collector;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import com.hyb.flink.learn.streaming.parameters.MyJobParameters;
 
 import com.hyb.flink.learn.streaming.util.WordCountData;
 
@@ -78,10 +86,29 @@ public class WordCount {
     public static void main(String[] args) throws Exception {
         final CLI params = CLI.fromArgs(args);
 
+        // 解析命令行参数
+        final ParameterTool parameterTool = ParameterTool.fromArgs(args);
+
+        Map<String, String> map = parameterTool.toMap();
+
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            System.out.println(entry.getKey() + ": " + entry.getValue());
+        }
+
+
         // Create the execution environment. This is the main entrypoint
         // to building a Flink application.
         //final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
+        ObjectMapper objectMapper = new ObjectMapper();
+        System.out.println(objectMapper.writeValueAsString(params));
+
+        String params_json = objectMapper.writeValueAsString(params);
+
+
+        // 例如，打印特定的参数
+        String inputPath = parameterTool.get("input", "default_input_path"); // 如果未提供 input 参数，则使用默认值 "default_input_path"
+        System.out.println("Input path: " + inputPath);
 
         // 参考：https://www.here.com/docs/bundle/data-client-library-developer-guide-java-scala/page/client/flink-connector-migration-guide.html
         Configuration config = new Configuration();
@@ -96,10 +123,16 @@ public class WordCount {
                 RestartStrategyOptions.RESTART_STRATEGY_FAILURE_RATE_DELAY,
                 Duration.ofSeconds(10));
 
+        config.setString("exec_sql", "select * from  table1 ");
+
 
         List<String> jarList = new ArrayList<>();
         //jarList.add("/usr/local/software/install/flink-1.19.2/examples/streaming/WordCount.jar");
         jarList.add("D:\\workspace-2025-stone-hg\\06\\flink-learn\\flink-learn-streaming\\target\\flink-learn-streaming-1.0.0.jar");
+
+
+        // 解析命令行参数
+
 
         // 参考：https://www.cnblogs.com/kunande/p/16353565.html
         StreamExecutionEnvironment env = StreamExecutionEnvironment.createRemoteEnvironment(
@@ -109,6 +142,7 @@ public class WordCount {
                 jarList.toArray(new String[0]));
 
         env.setRuntimeMode(RuntimeExecutionMode.BATCH);
+        env.getConfig().setGlobalJobParameters(new MyJobParameters("param1-----我是参数", "param2--我是参数2"));
 
 
         // Apache Flink’s unified approach to stream and batch processing means that a DataStream
@@ -134,7 +168,7 @@ public class WordCount {
 
         // This optional step makes the input parameters
         // available in the Flink UI.
-        env.getConfig().setGlobalJobParameters(params);
+        // env.getConfig().setGlobalJobParameters(params);
 
         DataStream<String> text;
         if (params.getInputs().isPresent()) {
@@ -188,6 +222,9 @@ public class WordCount {
         } else {
             counts.print().name("print-sink");
         }
+
+        ExecutionConfig.GlobalJobParameters globalParams = env.getConfig().getGlobalJobParameters();
+        counts.print("-------------------------------params_json=" + params_json + "----------globalParams =" + objectMapper.writeValueAsString(globalParams.toMap()));
 
         // Apache Flink applications are composed lazily. Calling execute
         // submits the Job and begins processing.
