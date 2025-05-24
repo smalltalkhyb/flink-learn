@@ -23,4 +23,5 @@
 hs_err_pid*
 replay_pid*
 .idea/
-flink-lean-table/target/
+/target/
+flink-learn-sql/gradle/wrapper/gradle-wrapper.jar
