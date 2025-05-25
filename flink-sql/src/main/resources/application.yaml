@@ -10,3 +10,4 @@ server:
 spring:
   application:
     name:  flink-sql
+

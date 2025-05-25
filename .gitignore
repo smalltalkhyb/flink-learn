@@ -25,3 +25,4 @@ replay_pid*
 .idea/
 /target/
 flink-learn-sql/gradle/wrapper/gradle-wrapper.jar
+flink-learn-streaming/target/

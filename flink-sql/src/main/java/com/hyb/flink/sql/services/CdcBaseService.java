@@ -18,13 +18,17 @@ import java.util.List;
 public class CdcBaseService {
     public void executeSql(@RequestBody List<String> sqlList) {
 
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.enableCheckpointing(3000);
-        StreamTableEnvironment tEnv = StreamTableEnvironment.create(env);
+        try {
+            StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+            env.enableCheckpointing(3000);
+            StreamTableEnvironment tEnv = StreamTableEnvironment.create(env);
 
-        sqlList.forEach(sql -> {
-            tEnv.executeSql(sql);
-        });
+            sqlList.forEach(sql -> {
+                tEnv.executeSql(sql);
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 }
