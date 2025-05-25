@@ -1,0 +1,12 @@
+
+server:
+  port: 8089
+  servlet:
+    context-path: /
+  tomcat:
+    connection-timeout: 20000
+    max-connections: 250
+    accept-count: 300
+spring:
+  application:
+    name:  flink-sql

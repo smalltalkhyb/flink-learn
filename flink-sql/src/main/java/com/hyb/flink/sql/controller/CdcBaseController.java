@@ -10,7 +10,7 @@ import java.util.List;
 
 /**
  * @program: flink-learn
- * @description:
+ * @description:  参考：https://zhuanlan.zhihu.com/p/650722737
  * @author: huyanbing
  * @create: 2025-05-24
  **/
